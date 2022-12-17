@@ -154,11 +154,26 @@ class MastodonInterface:
                 if self.debuginfo: print(f"File not found: {img_to_upload}")
             except MastodonAPIError as apierror:
                 if self.debuginfo: print(f"API Error: {str(apierror)}")
+                #try again 1 time, if fails, then move on...
+                post_res = retryPostTextAndImage( ptext = post_text, mediaids = media_id_list )
         else:
             if self.debuginfo: print(f"Not valid post!\n Lenght:{len(post_text)} \n Post:{post_text}\n")
     
         return post_res
     
+    #Function to be used ONLY if a post with images fails (triggers expection)
+    def retryPostTextAndImage(self, ptext = '', mediaids = '' ):
+        res_flg = False
+        if ptext and mediaids:
+            try:
+                time.sleep(20)
+                self.api.status_post( status = ptext, media_ids = mediaids )
+                if self.debuginfo: print(f"[retry] Post with {len(mediaids)} imgs: {ptext}\n")
+                res_flg = True
+            except MastodonAPIError as apierror:
+                if self.debuginfo: print(f"API Error on retry: {str(apierror)}")
+        return res_flg
+        
     
     #def tweetSysInfo( debuginfo = False ):
     #    #Get uptime info
