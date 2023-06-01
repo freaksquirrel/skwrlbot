@@ -13,9 +13,10 @@ def main():
     parser.add_option("-t", "--tweet", action="store", type="string", dest="tweet_text", help="send a tweet directly")
     parser.add_option("-p", "--post", action="store", type="string", dest="post_text", help="post on mastodon directly")
     parser.add_option("-f", "--fortune", action="store_true", dest="cookie")
+    parser.add_option("--dual", action="store_true", dest="dual_post", default=False, help="post on mastodon and twitter at the same time")
+    parser.add_option("--tweetonly", action="store_true", dest="only_tweet", default=False, help="post only to twitter...")
+    #parser.add_option("--hashtag", action="store", type="string", dest="hashtag_find")
     parser.add_option("-i", "--info", action="store_true", dest="sysinfo")
-    parser.add_option("--dual", action="store_true", dest="dual_post", help="post on twitter and mastodon at the same time")
-    parser.add_option("--hashtag", action="store", type="string", dest="hashtag_find")
     parser.add_option("-v", "--verbose", action="store_true", dest="debuginfo", default=False, help="Print out debug messages")
     (options, args) = parser.parse_args()
 
@@ -26,25 +27,30 @@ def main():
     # end debug purposes
 
     #create the twitter instance if required
-    if options.tweet_text or options.cookie or options.sysinfo or options.hashtag_find:
+    #if options.tweet_text or (options.cookie and (options.dual_post or options.only_tweet)) or options.sysinfo or options.hashtag_find:
+    if options.tweet_text or (options.cookie and (options.dual_post or options.only_tweet)) or options.sysinfo:
         twitterApi = TwitterInterface(debuginfo = options.debuginfo)
 
     #create the mastodon instance if required
-    if options.post_text or options.dual_post:
+    if options.post_text or (options.cookie and not options.only_tweet):
         mastodonApi = MastodonInterface(debuginfo = options.debuginfo)
     
-    # tweet system info
+    # post (and maybe tweet) the system info
     if options.sysinfo:
-        sysinfotxt = sbfunc.getSysInfo( debugflg = options.debuginfo, max_len = twitterApi.tweet_max_len )
-        twitterApi.tweetText( sysinfotxt )
+        sysinfotxt = sbfunc.getSysInfo( debugflg = options.debuginfo, max_len = mastodonApi.post_max_len )
+        mastodonApi.postText( sysinfotxt )
         if options.dual_post:
-            mastodonApi.postText( sysinfotxt )
+            twitterApi.tweetText( sysinfotxt )
     
-    # tweet a fortune cookie... also post to mastodon if flag is raised ;)
+    # Post a fortune cookie... depending on flags, it may also tweet it ;)
     if options.cookie:
-        fortunetxt = sbfunc.getFortuneCookie( debugflg = options.debuginfo, max_len = twitterApi.tweet_max_len )
-        twitterApi.tweetText( fortunetxt )
+        fortunetxt = sbfunc.getFortuneCookie( debugflg = options.debuginfo, max_len = mastodonApi.post_max_len )
         if options.dual_post:
+            mastodonApi.postText( fortunetxt )
+            twitterApi.tweetText( fortunetxt )
+        elif options.only_tweet:
+            twitterApi.tweetText( fortunetxt )
+        else:
             mastodonApi.postText( fortunetxt )
     
     # tweet something...
@@ -59,9 +65,9 @@ def main():
         if options.dual_post:
             twitterApi.tweetText( options.post_text )
 
-    # find a given hashtag in the bot's feed and perform related task...
-    if options.hashtag_find:
-        twitterApi.FindAndreplyTo()._hashtag( options.hashtag_find )
+    # find a given hashtag in the bot's feed and perform related task...  Will not support this anymore as the API does not allow it without paying...
+    #if options.hashtag_find:
+    #    twitterApi.FindAndreplyTo()._hashtag( options.hashtag_find )
         
     # finalizing the boring debug info...
     if options.debuginfo:
