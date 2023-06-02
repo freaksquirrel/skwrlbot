@@ -27,6 +27,7 @@ def tweetToPost( tAPI = False, mAPI = False, alltweets = False, debug_info = Fal
             #get own Tweets (not own timeline)
             twTimeLine = tAPI.getUserTimeline( user_screen_name = tAPI.screen_name )
             for tweet in reversed(twTimeLine):
+                if debug_info: print(f"Tweet: {tweet['full_text']}")
                 if ( re.findall('[#?]t2p\\b', tweet['full_text'].lower()) or alltweets ):
                     if 'media' in tweet['entities'].keys():
                         if debug_info: print(f"Need to download media from tweet. [{len(tweet['extended_entities']['media'])} file(s)]")
@@ -76,7 +77,7 @@ def tweetToPost( tAPI = False, mAPI = False, alltweets = False, debug_info = Fal
                 latesttweet_id_log = os.path.join(sbio.timeline_mngt_path, f"{tweet['user']['id']}{sbio.tl_latest_tweet_id_fn}")
                 if debug_info: print(f"File for user: {latesttweet_id_log}")
                 fp = open(latesttweet_id_log, 'w')
-                fp.write(f"{tweet['id']")
+                fp.write(f"{tweet['id']}")
                 fp.close()
             if debug_info: print(f"Posted {posted_tweets} tweets out of {len(twTimeLine)} to mastodon. Latest ID: {latest_posted_tweet_id} \n")
             return post_res

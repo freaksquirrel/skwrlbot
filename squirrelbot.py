@@ -20,31 +20,35 @@ def main():
     parser.add_option("-v", "--verbose", action="store_true", dest="debuginfo", default=False, help="Print out debug messages")
     (options, args) = parser.parse_args()
 
+    post_max_len = 0
+    
     # some boring debug info for the log
     if options.debuginfo:
         localtime = time.asctime( time.localtime(time.time()) )
         print(f"----------------------------------------------------- \n Start time: {localtime} \n")
     # end debug purposes
-
+    
     #create the twitter instance if required
     #if options.tweet_text or (options.cookie and (options.dual_post or options.only_tweet)) or options.sysinfo or options.hashtag_find:
     if options.tweet_text or (options.cookie and (options.dual_post or options.only_tweet)) or options.sysinfo:
         twitterApi = TwitterInterface(debuginfo = options.debuginfo)
+        post_max_len = twitterApi.tweet_max_len
 
     #create the mastodon instance if required
     if options.post_text or (options.cookie and not options.only_tweet):
         mastodonApi = MastodonInterface(debuginfo = options.debuginfo)
+        post_max_len = mastodonApi.post_max_len
     
     # post (and maybe tweet) the system info
     if options.sysinfo:
-        sysinfotxt = sbfunc.getSysInfo( debugflg = options.debuginfo, max_len = mastodonApi.post_max_len )
+        sysinfotxt = sbfunc.getSysInfo( debugflg = options.debuginfo, max_len = post_max_len )
         mastodonApi.postText( sysinfotxt )
         if options.dual_post:
             twitterApi.tweetText( sysinfotxt )
     
     # Post a fortune cookie... depending on flags, it may also tweet it ;)
     if options.cookie:
-        fortunetxt = sbfunc.getFortuneCookie( debugflg = options.debuginfo, max_len = mastodonApi.post_max_len )
+        fortunetxt = sbfunc.getFortuneCookie( debugflg = options.debuginfo, max_len = post_max_len )
         if options.dual_post:
             mastodonApi.postText( fortunetxt )
             twitterApi.tweetText( fortunetxt )
