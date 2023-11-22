@@ -32,5 +32,11 @@ def getSysInfo( debugflg = False, max_len = 270 ):
 
     return sysinfo_text
 
+
+
+# Disk usage
+#   subprocess.check_output("df --output=pcent / | tail -n 1", shell=True).decode()
+# Memory usage
+#   ps aux --sort=-%mem | head
     
 # === END === 

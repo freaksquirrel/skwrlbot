@@ -157,7 +157,7 @@ class MastodonInterface:
                 #try again 1 time, if fails, then move on...
                 post_res = retryPostTextAndImage( ptext = post_text, mediaids = media_id_list )
         else:
-            if self.debuginfo: print(f"Not valid post!\n Lenght:{len(post_text)} \n Post:{post_text}\n")
+            if self.debuginfo: print(f"Not valid post!\n Lenght:{len(post_text)} \n Post:{post_text}\n Images:{len(image_path)}\n")
     
         return post_res
     
