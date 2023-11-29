@@ -10,7 +10,7 @@ from sb_mastodon import MastodonInterface
 
 
 def main():
-    parser = argparse.ArgumentParser( description="Post weather imfo from AMEADAS api to the fediverse or twitter.")
+    parser = argparse.ArgumentParser( description="Post weather info from AMEADAS api to the fediverse or twitter.")
     parser.add_argument("-p", "--postweather",     action="store_true", dest="postweather",     default=False, help="Post latest weather info for default area")
     parser.add_argument("-c", "--compweatherdate", action="store_true", dest="compweatherdate", default=False, help="Post weather comparison by dates for default area")
     parser.add_argument("-a", "--cmpweatherarea",  action="store_true", dest="cmpweatherarea",  default=False, help="Post weather comparison of the 2 default areas")
