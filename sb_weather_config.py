@@ -11,6 +11,7 @@ graph_comp_fname = 'comp_'
 graph_simple_fname   = f"{graph_generic_fname}VALUE_YYYY-MM-DD{graphs_file_ext}"
 graph_datecomp_fname = f"{graph_generic_fname}VALUE_{graph_comp_fname}yyyy-mm-ddvsYYYY-MM-DD{graphs_file_ext}"
 graph_areacomp_fname = f"{graph_generic_fname}VALUE_-AREAA-VS-AREAB-_YYYY-MM-DD{graphs_file_ext}"
+graph_allareascomp_fname = f"{graph_generic_fname}VALUE_{graph_comp_fname}AllAreasVS_YYYY-MM-DD{graphs_file_ext}"
 
 replace_target_value = "VALUE_"    # does this needs to be VALUE instead of VALUE_ ??
 replace_target_date = "YYYY-MM-DD"
@@ -33,6 +34,7 @@ weather_ondate_post_text = f"Graphs about the weather on {replace_target_date} @
 weather_ondate_post_single_text = f"Graph of the {replace_target_value} on {replace_target_date} @ Mito, Ibaraki, Japan. \n (Info acquired from AMeDAS, Japan Meteorological Agency)\n #weatherSQuirreL"
 weather_comp_post_text = f"Graphs comparing the weather of {replace_target_date_cmp} vs {replace_target_date}  @ Mito, Ibaraki, Japan. \n (Info acquired from AMeDAS, Japan Meteorological Agency)\n #weatherSQuirreL"
 weather_comparea_post_text = f"Graphs comparing the weather @ {replace_target_acodeA} vs {replace_target_acodeB} on {replace_target_date}. \n (Info acquired from AMeDAS, Japan Meteorological Agency)\n #weatherSQuirreL"
+weather_compareas_post_text = f"Graphs comparing weather info of different areas on {replace_target_date}. \n (Info acquired from AMeDAS, Japan Meteorological Agency)\n #weatherSQuirreL"
 
 #temporarly took this from the weathersquirrel configs
 ## info for plots   value (json format)       Name                           Axis title          filename

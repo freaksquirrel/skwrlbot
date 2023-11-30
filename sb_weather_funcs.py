@@ -143,6 +143,28 @@ def postCompAreaWeatherInfo( mAPI = False, areaA = '', areaB = '', when_weather 
     return post_res
 
 
+def postAllAreasWeatherInfo( mAPI = False, val_name = 'all', when_weather = '', debug_info = False):
+    post_res = False
+    if not mAPI or not isinstance(mAPI, MastodonInterface):
+        return post_res
+    else:
+        #Check that the API is working fine
+        if mAPI.credentials == False or mAPI.app_name == '':
+            return post_res
+        else:
+            try:
+                if( not when_weather or not isinstance(when_weather, dt.datetime) ): when_weather = dt.datetime.today() - dt.timedelta(days = 1)
+                weather_comp_image_path = []
+                weather_comp_image_path = findWeatherCompAllAreasGraphsByDate( target_datetime = when_weather, val_name=val_name )
+                weather_comp_post_text = sbwcfg.weather_compareas_post_text.replace( sbwcfg.replace_target_date, when_weather.strftime('%Y-%m-%d') )
+                post_res = mAPI.postTextAndImage(post_text = weather_comp_post_text, image_path = weather_comp_image_path )
+            except MastodonAPIError as apierror:
+                if debug_info: print(f"API Error: {str(apierror)}")
+
+    if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_weather} weather comparison between areas to mastodon.\n")
+    return post_res
+
+
 # Search for weather info graphs from a given date at the given path and return the paths
 def findWeatherGraphsByDate( target_datetime = '', val_name = '', graph_path = ''):
     if( not isinstance(target_datetime, dt.datetime) ): target_datetime = dt.datetime.now()
@@ -171,7 +193,7 @@ def findWeatherCompGraphsByDate( lst_target = '', prv_target = '', graph_path = 
     datetime_str_prv = prv_target.strftime('%Y-%m-%d')
     val_replace = '*'
     search_pattern = graph_path + sbwcfg.graph_datecomp_fname.replace( sbwcfg.replace_target_value, val_replace ).replace( sbwcfg.replace_target_date, datetime_str_lst ).replace( sbwcfg.replace_target_date_cmp, datetime_str_prv )
-    print(f"The searh pattenn -> ({search_pattern})")
+    print(f"The searh pattern -> ({search_pattern})")
     graph_files = glob.glob( search_pattern )
     return graph_files
 
@@ -198,7 +220,25 @@ def findWeatherCompAreaGraphsByDate( target_datetime = '', val_name = '', areaA 
         val_replace = sbwcfg.graph_amedas_dic[val_name][2]
 
     search_pattern = graph_path + sbwcfg.graph_areacomp_fname.replace(sbwcfg.replace_target_acodeA, areaa_replace).replace(sbwcfg.replace_target_acodeB, areab_replace).replace(sbwcfg.replace_target_date , datetime_str).replace(sbwcfg.replace_target_value , val_replace)
-    print(f"The searh pattenn -> ({search_pattern})")
+    print(f"The searh pattern -> ({search_pattern})")
+    graph_files = glob.glob( search_pattern )
+    return graph_files
+
+
+# Search for weather comparison graphs from a given date at the given path and return the paths
+def findWeatherCompAllAreasGraphsByDate( target_datetime = '', val_name = 'all', graph_path = '' ):
+    if( not isinstance(target_datetime, dt.datetime) ): target_datetime = dt.datetime.now()
+    if( not graph_path ):
+        graph_path = sbwcfg.graph_path.replace(sbwcfg.replace_target_year, target_datetime.strftime('%Y')).replace(sbwcfg.replace_target_month,target_datetime.strftime('%m')).replace(sbwcfg.replace_target_areacode, 'common')
+    datetime_str = target_datetime.strftime('%Y-%m-%d')
+
+    if val_name == 'all':
+        val_replace = '*'
+    else:
+        val_replace = sbwcfg.graph_amedas_dic[val_name][2]
+
+    search_pattern = graph_path + sbwcfg.graph_allareascomp_fname.replace(sbwcfg.replace_target_date , datetime_str).replace(sbwcfg.replace_target_value , val_replace)
+    print(f"The searh pattern -> ({search_pattern})")
     graph_files = glob.glob( search_pattern )
     return graph_files
 
