@@ -19,7 +19,7 @@ class MastodonInterface:
     #class constructor
     def __init__(self, debuginfo = False):
         self.debuginfo = debuginfo
-        self.api = Mastodon( client_id = sbauth.MASTODON_CLIENT_ID, client_secret = sbauth.MASTODON_CLIENT_SECRET, access_token = sbauth.MASTODON_ACCESS_TOKEN , api_base_url = sbauth.MASTODON_API_BASE_URL )
+        self.api = Mastodon( version_check_mode="none", client_id = sbauth.MASTODON_CLIENT_ID, client_secret = sbauth.MASTODON_CLIENT_SECRET, access_token = sbauth.MASTODON_ACCESS_TOKEN , api_base_url = sbauth.MASTODON_API_BASE_URL )
         try:
             self.app_credentials = self.api.app_verify_credentials()
             self.app_name = self.app_credentials['name']
