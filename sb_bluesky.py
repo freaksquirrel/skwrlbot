@@ -10,9 +10,6 @@ from atproto import Client, client_utils
 
 import sb_authinfo_bluesky as sbauth
 import sb_iofiles as sbio
-
-
-#text = client_utils.TextBuilder().text('Hello World from ').link('Python SDK', 'https://atproto.blue')
         
 class BlueskyInterface:
 
