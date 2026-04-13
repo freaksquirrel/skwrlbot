@@ -11,8 +11,8 @@ from sb_bluesky import BlueskyInterface
 
 def main():
     parser = argparse.ArgumentParser( description="Post stuff to the fediverse and bluesky")
-    parser.add_argument("-p", "--post", action="store", type="string", dest="post_text", help="post on mastodon directly")
-    parser.add_argument("-b", "--blue", action="store", type="string", dest="bpos_text", help="post on bluesky directly")
+    parser.add_argument("-p", "--post", action="store", dest="post_text", help="post on mastodon directly")
+    parser.add_argument("-b", "--blue", action="store", dest="bpos_text", help="post on bluesky directly")
     parser.add_argument("-f", "--fortune", action="store_true", dest="cookie")
     #parser.add_argument("--dual", action="store_true", dest="dual_post", default=False, help="post on mastodon and XXX at the same time")
     #parser.add_option("--hashtag", action="store", type="string", dest="hashtag_find")
@@ -36,7 +36,7 @@ def main():
     # create the bluesky instance if required
     if args.bpos_text or args.cookie:
         blueskyApi = BlueskyInterface(debuginfo = args.debuginfo)   #TODO: check if async is better
-        post_max_len = blueskyApi.post_max_len
+        #post_max_len = blueskyApi.post_max_len
     
     # post (and maybe tweet) the system info
     if args.sysinfo:
@@ -47,9 +47,11 @@ def main():
     
     # Post a fortune cookie...
     if args.cookie:
-        fortunetxt = sbfunc.getFortuneCookie( debugflg = args.debuginfo, max_len = post_max_len )
+        fortunetxt = sbfunc.getFortuneCookie( debugflg = args.debuginfo, max_len = mastodonApi.post_max_len )
         mastodonApi.postText( fortunetxt )
-        blueskyApi.postText( fortunetxt )
+        fortunetxt = sbfunc.getFortuneCookie( debugflg = args.debuginfo, max_len = blueskyApi.post_max_len )
+        #blueskyApi.postText( fortunetxt , True )
+        blueskyApi.postText( post_text = fortunetxt, fortune_c = True )
         
         # if args.dual_post:
         #     mastodonApi.postText( fortunetxt )

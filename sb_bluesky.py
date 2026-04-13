@@ -51,18 +51,23 @@ class BlueskyInterface:
         return user_timeline
 
     # post only text...
-    def postText( self, post_text = '' ):
+    def postText( self, post_text = '', fortune_c = False ):
         
-        post_res = False
+        post_res = False 
         if post_text and len(post_text) < self.post_max_len:
+            if fortune_c: post_text = post_text.replace("#fortune", "")
             text_builder = client_utils.TextBuilder()
-            text_builder.text(post_text)
-            text_builder.tag('SKWRL bot', 'skwrlbot')
+            text_builder.text( post_text )
+            if fortune_c:
+                text_builder.tag('#fortune', 'fortune')
+                text_builder.text(" \n ")
+            text_builder.tag('#skwrlbot', 'skwrlbot')
             self.client.send_post(text_builder)
             post_res = True
-            if self.debuginfo: print(f"Post: {post_text}\n")
+            #if self.debuginfo: print(f"Post: {post_text}\n")
+            if self.debuginfo: print(f"Post: {text_builder.build_text()}\n")
         else:
-            if self.debuginfo: print(f"Not valid post!\n Lenght:{len(post_text)} \n Tweet:{post_text}\n")
+            if self.debuginfo: print(f"Not valid post!\n Lenght:{len(post_text)} \n Post:{post_text}\n")
         return post_res
 
     
