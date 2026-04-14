@@ -92,7 +92,6 @@ class BlueskyInterface:
                         if self.debuginfo: print(f"Will upload a {img_type} image of size {img_size}MB \n path:{img_to_upload}\n")
                         with open(img_to_upload, 'rb') as imgf:
                             images.append(imgf.read())
-                        
                     else:
                         if self.debuginfo: print(f"Image type or size error... type: {img_type}, size: {img_size}MB")
                     if len(media_list) >= 4: break

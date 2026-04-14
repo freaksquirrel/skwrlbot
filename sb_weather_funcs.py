@@ -5,15 +5,15 @@ import datetime as dt
 import glob
 import sb_weather_config as sbwcfg
 from sb_mastodon import MastodonInterface
-from sb_twitter import TwitterInterface
+from sb_bluesky import BlueskyInterface
 
 
-# Post a single weather graph/info for a given date to either Mastodon or Twitter
+# Post a single weather graph/info for a given date to either Mastodon or Bluesky
 # ============= BEGIN: STILL UNDER CONSTRUCTION =========================
 def postWeatherInfoSingle( API = False, value = '', target_date = '', debug_info = False):
     post_res = False
     toWhere = ''
-    if not API or (not isinstance(API, MastodonInterface) and not isinstance(API, TwitterInterface)) or value == '':
+    if not API or (not isinstance(API, MastodonInterface) and not isinstance(API, BlueskyInterface)) or value == '':
         return post_res
     else:
         #Check that the API is working fine
@@ -28,15 +28,13 @@ def postWeatherInfoSingle( API = False, value = '', target_date = '', debug_info
                 if isinstance(API, MastodonInterface):
                     #post_res = API.postTextAndImage(post_text = weather_post_text, image_path = weather_image_path )
                     toWhere = 'Mastodon'
-                elif isinstance(API, TwitterInterface):
-                    #post_res = API.tweetTextAndImage(tweet_text = weather_post_text, image_path = weather_image_path )
-                    toWhere = 'Twitter'
+                if isinstance(API, BlueskyInterface):
+                    #post_res = API.postTextAndImage(post_text = weather_post_text, image_path = weather_image_path )
+                    toWhere = 'Bluesky'
                 else:
                     return post_res
             except MastodonAPIError as apierror:
                 if debug_info: print(f"Mastodon API Error: {str(apierror)}")
-            except TwythonExceptions.TwythonError as apierror:
-                if debug_info: print(f"Twitter API Error: {str(apierror)}")
 
     if debug_info: print(f"Posted {len(weather_image_path)} graph regarding {target_date} {value} to {toWhere}.\n")
     return post_res
@@ -65,6 +63,26 @@ def postWeatherInfoSimple( mAPI = False, debug_info = False):
     return post_res
 
 
+# Post all weather graphs/info for a given date to Bluesky (up to 4 images)
+def posbWeatherInfoSimple( mAPI = False, debug_info = False):
+    post_res = False
+    if not mAPI or not isinstance(mAPI, BlueskyInterface):
+        return post_res
+    else:
+        try:
+            when_weather = dt.datetime.today()# - dt.timedelta(days = 1)
+            weather_image_path = []
+            weather_image_path = findWeatherGraphsByDate( target_datetime = when_weather )
+            weather_post_text = sbwcfg.weather_ondate_post_text.replace( sbwcfg.replace_target_date, when_weather.strftime('%Y-%m-%d') )
+            post_res = mAPI.postTextAndImage(post_text = weather_post_text, image_path = weather_image_path )
+        except atproto.exceptions.AtProtocolError :
+            if debug_info: print(f"Bluesky Error...")
+
+    if debug_info: print(f"Posted {len(weather_image_path)} graph regarding {when_weather} weather to mastodon.\n")
+    return post_res
+
+
+
 # Post all weather comparison graphs to Mastodon (up to 4 images)
 def postCompWeatherInfo( mAPI = False, debug_info = False):
     post_res = False
@@ -86,30 +104,6 @@ def postCompWeatherInfo( mAPI = False, debug_info = False):
                 if debug_info: print(f"API Error: {str(apierror)}")
 
     if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_lst} vs {when_prv} weather to mastodon.\n")
-    return post_res
-
-
-# Tweet all weather comparison graphs (up to 4 images)
-def tweetCompWeatherInfo( tAPI = False, debug_info = False):
-    post_res = False
-    if not tAPI or not isinstance(tAPI, TwitterInterface):
-        return post_res
-    else:
-        #Check that the API is working fine
-        if tAPI.credentials == False or tAPI.screen_name == '':
-            return post_res
-        else:
-            try:
-                when_lst = dt.datetime.today() - dt.timedelta(days = sbwcfg.ndays_timedelta_lst)
-                when_prv = dt.datetime.today() - dt.timedelta(days = sbwcfg.ndays_timedelta_prv)
-                weather_comp_image_path = []
-                weather_comp_image_path = findWeatherCompGraphsByDate( lst_target = when_lst, prv_target = when_prv )
-                weather_comp_post_text = sbwcfg.weather_comp_post_text.replace( sbwcfg.replace_target_date, when_lst.strftime('%Y-%m-%d') ).replace( sbwcfg.replace_target_date_cmp, when_prv.strftime('%Y-%m-%d') )
-                post_res = tAPI.tweetTextAndImage(tweet_text = weather_comp_post_text, image_path = weather_comp_image_path )
-            except TwythonExceptions.TwythonError as apierror:
-                if debug_info: print(f"API Error: {str(apierror)}")
-
-    if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_lst} vs {when_prv} weather to twitter.\n")
     return post_res
 
 
@@ -160,6 +154,24 @@ def postAllAreasWeatherInfo( mAPI = False, val_name = 'all', when_weather = '', 
                 post_res = mAPI.postTextAndImage(post_text = weather_comp_post_text, image_path = weather_comp_image_path )
             except MastodonAPIError as apierror:
                 if debug_info: print(f"API Error: {str(apierror)}")
+
+    if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_weather} weather comparison between areas to mastodon.\n")
+    return post_res
+
+
+def posbAllAreasWeatherInfo( mAPI = False, val_name = 'all', when_weather = '', debug_info = False):
+    post_res = False
+    if not mAPI or not isinstance(mAPI, BlueskyInterface):
+        return post_res
+    else:
+        try:
+            if( not when_weather or not isinstance(when_weather, dt.datetime) ): when_weather = dt.datetime.today() - dt.timedelta(days = 1)
+            weather_comp_image_path = []
+            weather_comp_image_path = findWeatherCompAllAreasGraphsByDate( target_datetime = when_weather, val_name=val_name )
+            weather_comp_post_text = sbwcfg.weather_compareas_post_text.replace( sbwcfg.replace_target_date, when_weather.strftime('%Y-%m-%d') )
+            post_res = mAPI.postTextAndImage(post_text = weather_comp_post_text, image_path = weather_comp_image_path )
+        except atproto.exceptions.AtProtocolError :
+            if debug_info: print(f"Bluesky Error...")
 
     if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_weather} weather comparison between areas to mastodon.\n")
     return post_res
