@@ -173,7 +173,7 @@ def posbAllAreasWeatherInfo( mAPI = False, val_name = 'all', when_weather = '', 
         except atproto.exceptions.AtProtocolError :
             if debug_info: print(f"Bluesky Error...")
 
-    if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_weather} weather comparison between areas to mastodon.\n")
+    if debug_info: print(f"Posted {len(weather_comp_image_path)} graph regarding {when_weather} weather comparison between areas to bluesky.\n")
     return post_res
 
 

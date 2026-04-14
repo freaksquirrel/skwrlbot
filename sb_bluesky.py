@@ -76,10 +76,19 @@ class BlueskyInterface:
         post_res = False
         valid_img_types = {'jpeg','png','bmp'}
         valid_img_size = 5
-        if image_path and post_text and image_alt and len(post_text) < self.post_max_len:
+        #if image_path and post_text and image_alt and len(post_text) < self.post_max_len:
+        if image_path and post_text and len(post_text) < self.post_max_len:
             try:
                 if not isinstance(image_path, list): image_path = [image_path]
-                if not isinstance(image_alt , list): image_alt  = [image_alt]
+                #if not isinstance(image_alt , list): image_alt  = [image_alt]
+                image_alt = [post_text] * len(image_path)
+
+                post_text = post_text.replace("#weatherSQuirreL", "")
+                text_builder = client_utils.TextBuilder()
+                text_builder.text( post_text )
+                text_builder.tag('#weatherSQuirreL', 'weatherSQuirreL')
+                text_builder.text(" \n ")
+                text_builder.tag('#skwrlbot', 'skwrlbot')
 
                 media_list = []
                 for img_to_upload in image_path:
@@ -91,13 +100,13 @@ class BlueskyInterface:
                     if img_type in valid_img_types and img_size < valid_img_size:
                         if self.debuginfo: print(f"Will upload a {img_type} image of size {img_size}MB \n path:{img_to_upload}\n")
                         with open(img_to_upload, 'rb') as imgf:
-                            images.append(imgf.read())
+                            media_list.append(imgf.read())
                     else:
                         if self.debuginfo: print(f"Image type or size error... type: {img_type}, size: {img_size}MB")
                     if len(media_list) >= 4: break
                 if media_list:
                     self.client.send_images(
-                        text = post_text,
+                        text = text_builder,
                         images = media_list,
                         image_alts = image_alt
                     )
